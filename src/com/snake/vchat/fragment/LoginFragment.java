@@ -33,14 +33,14 @@ public class LoginFragment extends BaseFragment{
 	}
 
 
-	private void findViews() {
+	protected void findViews() {
 		mPhone = (EditText) findViewById(R.id.et_phone);
 		mPassword = (EditText) findViewById(R.id.et_password);
 		mLogin = (Button) findViewById(R.id.bt_login);
 	}
 
 
-	private void init() {
+	protected void init() {
 		mLogin.setOnClickListener(onClickListener);
 	}
 
@@ -51,14 +51,20 @@ public class LoginFragment extends BaseFragment{
 		public void onClick(View v) {
 			switch(v.getId()){
 			case R.id.bt_login:
-				if(confirm())
-					startActivity(new Intent(getActivity(), FunctionHostActivity.class));
+				login();
 				break;
 			}
 
 		}
 	};
+	
+	
+	private void login(){
+		if(confirm())
+			startActivity(new Intent(getActivity(), FunctionHostActivity.class));
+	};
 
+	
 	private boolean confirm(){
 		if(mPhone.getText().toString().trim().length()>0 && mPassword.getText().toString().trim().length()>0)
 			return true;
@@ -67,6 +73,7 @@ public class LoginFragment extends BaseFragment{
 
 	}
 
+	
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();

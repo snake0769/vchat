@@ -28,6 +28,7 @@ public class MainActivity extends FragmentActivity {
 		
 	};
 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,6 +37,7 @@ public class MainActivity extends FragmentActivity {
 		mHandler.sendMessageDelayed(msg, LAUCH_DELAY);
 	}
 
+	
 	@Override
 	protected void onDestroy() {
 		mHandler.removeMessages(MSG_LAUCH);

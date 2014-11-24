@@ -13,10 +13,10 @@ import com.snake.vchat.R;
 public class FunctionHostActivity extends FragmentActivity{
 public static final String TAG = "FunctionHostActivity";
 	
-private ViewPager mVP_Root;
-private RadioGroup mRG_Fuction;
-private RadioButton mRB_Conversation;
-private RadioButton mRB_Contacts;
+private ViewPager mRoot;
+private RadioGroup mFuction;
+private RadioButton mConversation;
+private RadioButton mContacts;
 
 	@Override
 	protected void onCreate(Bundle arg0) {
@@ -27,15 +27,17 @@ private RadioButton mRB_Contacts;
 		init();
 	}
 	
+	
 	private void findViews(){
-		mVP_Root = (ViewPager) findViewById(R.id.vp_root);
-		mRG_Fuction = (RadioGroup) findViewById(R.id.rg_function);
-		mRB_Conversation = (RadioButton) findViewById(R.id.rb_conversation);
-		mRB_Contacts = (RadioButton) findViewById(R.id.rb_contacts);
+		mRoot = (ViewPager) findViewById(R.id.vp_root);
+		mFuction = (RadioGroup) findViewById(R.id.rg_function);
+		mConversation = (RadioButton) findViewById(R.id.rb_conversation);
+		mContacts = (RadioButton) findViewById(R.id.rb_contacts);
 	}
 	
+	
 	private void init(){
-		mRG_Fuction.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		mFuction.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
 			@Override
 			public void onCheckedChanged(RadioGroup group, int checkedId) {

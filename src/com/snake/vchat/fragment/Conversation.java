@@ -1,8 +1,6 @@
 package com.snake.vchat.fragment;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.graphics.Bitmap;
@@ -23,17 +21,16 @@ import com.snake.vchat.manager.ContactsManager;
 import com.snake.vchat.manager.ContactsManager.Contact;
 import com.snake.vchat.util.MultiThreadingAsyncTask;
 
-public class Contacts extends BaseFragment{
-
-	private ListView mContacts;
-	private ArrayList<Contact> contactsList = new ArrayList<Contact>();
+public class Conversation extends BaseFragment{
+	private ListView mConversation;
+	private ArrayList<Contact> conversationList = new ArrayList<Contact>();
 	private ArrayList<Bitmap> avatarList = new ArrayList<Bitmap>();
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
-		globalView = inflater.inflate(R.layout.fragment_contacts, null);
+		globalView = inflater.inflate(R.layout.fragment_conversation, null);
 		findViews();
 		init();
 		return globalView;
@@ -42,8 +39,8 @@ public class Contacts extends BaseFragment{
 	
 	@Override
 	protected void findViews() {
-		mContacts = (ListView) findViewById(R.id.lv_contacts);
-		mContacts.setAdapter(contactsAdapter);
+		mConversation = (ListView) findViewById(R.id.lv_conversation);
+		mConversation.setAdapter(conversationAdapter);
 	}
 
 	
@@ -54,45 +51,50 @@ public class Contacts extends BaseFragment{
 			@Override
 			protected Void doInBackground(Void params)
 					throws CLInvalidNetworkException, CLConnectionException {
-				contactsList = ContactsManager.getInstance().getPhoneContacts();
+				conversationList = ContactsManager.getInstance().getPhoneContacts();
 				return null;
 			}
 
 			@Override
 			protected void doOnSuccess(Void result) {
-				contactsAdapter.notifyDataSetChanged();
+				conversationAdapter.notifyDataSetChanged();
 			}
 		}.executeOnExecutor(MultiThreadingAsyncTask.THREAD_POOL_EXECUTOR);
 	}
 	
 	
-	private BaseAdapter contactsAdapter  = new BaseAdapter() {
+	private BaseAdapter conversationAdapter  = new BaseAdapter() {
 		
 		class ViewHolder{
 			public ImageView avatar;
 			public TextView name;
+			public TextView lastRecord;
 		}
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder viewholder = new ViewHolder();
 			if(convertView == null){
-				convertView = LayoutInflater.from(getActivity()).inflate(R.layout.item_contacts, null);
+				convertView = LayoutInflater.from(getActivity()).inflate(R.layout.item_conversation, null);
 				viewholder.avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
 				viewholder.name = (TextView) convertView.findViewById(R.id.tv_name);
+				viewholder.lastRecord = (TextView) convertView.findViewById(R.id.tv_lastRecord);
 				convertView.setTag(viewholder);
 			}else{
 				viewholder = (ViewHolder) convertView.getTag();
 			}
 			
 			//显示头像
-			ByteArrayInputStream is = new ByteArrayInputStream(contactsList.get(position).photo_data);
+			ByteArrayInputStream is = new ByteArrayInputStream(conversationList.get(position).photo_data);
 			Bitmap bmp = BitmapFactory.decodeStream(is);
 			avatarList.add(bmp);
 			viewholder.avatar.setImageBitmap(bmp);
 			
 			//显示名字
-			viewholder.name.setText(contactsList.get(position).name);
+			viewholder.name.setText(conversationList.get(position).name);
+			
+			/*//显示最后记录
+			viewholder.lastRecord.setText(conversationList.get(position).name);*/
 			
 			return convertView;
 		}
@@ -109,8 +111,7 @@ public class Contacts extends BaseFragment{
 		
 		@Override
 		public int getCount() {
-			return contactsList.size();
+			return conversationList.size();
 		}
 	};
-
 }
