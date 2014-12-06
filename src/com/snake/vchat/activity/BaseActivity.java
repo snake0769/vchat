@@ -1,8 +1,17 @@
 package com.snake.vchat.activity;
 
 import android.app.Activity;
+import android.os.Bundle;
 
-public class BaseActivity extends Activity{
+abstract public class BaseActivity extends Activity{
 
-	public  final String TAG = getClass().getName();
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+	}
+
+	abstract protected void findViews();
+	
+	abstract protected void init();
+	
 }

@@ -15,10 +15,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
+        android:name="com.snake.vchat.app.VChatApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme" 
+        android:screenOrientation="portrait" >
         <activity
             android:name="com.snake.vchat.activity.MainActivity"
             android:label="@string/app_name"
@@ -27,6 +29,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.snake.vchat.activity.FunctionHostActivity"
+            android:theme="@style/Title">
+        </activity>
+        <activity
+            android:name="com.snake.vchat.activity.RegisterActivity"
+            android:theme="@style/Title">
         </activity>
     </application>
 

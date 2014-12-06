@@ -3,47 +3,42 @@ package com.snake.vchat.manager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.text.TextUtils;
 
-import com.snake.vchat.R;
+import com.snake.vchat.pojo.PhoneContactAO;
+import com.snake.vchat.pojo.UserAO;
 
 public class ContactsManager extends BaseManager{
-
+	public static final String TAG = ContactsManager.class.getSimpleName();
+	
 	/**获取库Phon表字段**/  
 	private static final String[] PHONES_PROJECTION = new String[] {  
 		Phone.DISPLAY_NAME, Phone.NUMBER, Photo.PHOTO_ID,Phone.CONTACT_ID };  
-
 	/**联系人显示名称**/  
 	private static final int PHONES_DISPLAY_NAME_INDEX = 0;  
-
 	/**电话号码**/  
 	private static final int PHONES_NUMBER_INDEX = 1;  
-
 	/**头像ID**/  
 	private static final int PHONES_PHOTO_ID_INDEX = 2;  
-
 	/**联系人的ID**/  
 	private static final int PHONES_CONTACT_ID_INDEX = 3;  
 
-	public class Contact{
-		public long id;
-		public String phone;
-		public String name;
-		public long photo_id;
-		public byte[] photo_data;
+	private List<UserAO> mContacts = new ArrayList<UserAO>();
 
-	}
 
 	private static ContactsManager mInstance;
 
@@ -57,10 +52,13 @@ public class ContactsManager extends BaseManager{
 	}
 
 	
-	/**得到手机通讯录联系人信息**/  
-	public ArrayList<Contact> getPhoneContacts() {  
+	/**
+	 * 获取手机通讯录
+	 * @return
+	 */
+	public ArrayList<PhoneContactAO> getPhoneContacts() {  
 		ContentResolver resolver = mContext.getContentResolver();  
-		ArrayList<Contact> contacts = new ArrayList<Contact>();
+		ArrayList<PhoneContactAO> contacts = new ArrayList<PhoneContactAO>();
 
 		// 获取手机联系人  
 		Cursor phoneCursor = resolver.query(Phone.CONTENT_URI,PHONES_PROJECTION, null, null, null);  
@@ -74,7 +72,7 @@ public class ContactsManager extends BaseManager{
 				if (TextUtils.isEmpty(phoneNumber))  
 					continue;  
 
-				Contact contact = new Contact();
+				PhoneContactAO contact = new PhoneContactAO();
 				//得到联系人名称  
 				contact.name = phoneCursor.getString(PHONES_DISPLAY_NAME_INDEX);  
 				//得到联系人ID  
@@ -101,4 +99,23 @@ public class ContactsManager extends BaseManager{
 		return contacts;
 	} 
 
+	
+	/**
+	 * 获得所有联系人列表
+	 * @return
+	 */
+	public List<UserAO> getContacts(XMPPConnection connection) {
+		for (RosterEntry entry : connection.getRoster().getEntries()) {
+			entry
+		}
+		
+		if (mContacts == null)
+			throw new RuntimeException("contacts is null");
+
+		return userList;
+	}
+	
+	
+	
+	
 }

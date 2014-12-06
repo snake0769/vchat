@@ -1,24 +1,34 @@
 package com.snake.vchat.fragment;
 
-import android.app.Fragment;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
-public class BaseFragment extends Fragment{
-	public  final String TAG = getClass().getName();
+abstract public class BaseFragment extends Fragment{
+	
 	protected View globalView;
 	
 	
+	@Override
+	public View onCreateView(LayoutInflater inflater,
+			ViewGroup container, Bundle savedInstanceState) {
+		findViews();
+		init();
+		return super.onCreateView(inflater, container, savedInstanceState);
+		
+		
+	}
+
+
 	protected View findViewById(int id){
 		return globalView.findViewById(id);
 	}
 	
 	
-	protected void findViews(){
-		
-	}
+	abstract protected void findViews();
 	
-	
-	protected void init(){
-		
-	}
+	abstract protected void init();
 }
