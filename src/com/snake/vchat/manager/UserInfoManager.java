@@ -42,7 +42,7 @@ public class UserInfoManager extends BaseManager{
 		Editor editor = sp.edit();
 		editor.putString(SP_USER_INFORMATION_USERNAME, ao.username);
 		editor.putString(SP_USER_INFORMATION_PASSWORD, ao.password);
-		editor.putString(SP_USER_INFORMATION_NICKNAME, ao.nickname);
+		editor.putString(SP_USER_INFORMATION_NICKNAME, ao.name);
 		editor.putString(SP_USER_INFORMATION_EMAIL, ao.email);
 		editor.putString(SP_USER_INFORMATION_REMARK, ao.remark);
 		editor.putString(SP_USER_INFORMATION_AVATARURL, ao.avatarUrl);
@@ -56,7 +56,7 @@ public class UserInfoManager extends BaseManager{
 		LoginAO ao = new LoginAO();
 		ao.username = sp.getString(SP_USER_INFORMATION_USERNAME, "");
 		ao.password = sp.getString(SP_USER_INFORMATION_PASSWORD, "");
-		ao.nickname = sp.getString(SP_USER_INFORMATION_NICKNAME, "");
+		ao.name = sp.getString(SP_USER_INFORMATION_NICKNAME, "");
 		ao.email = sp.getString(SP_USER_INFORMATION_EMAIL, "");
 		ao.remark = sp.getString(SP_USER_INFORMATION_REMARK, "");
 		ao.avatarUrl = sp.getString(SP_USER_INFORMATION_AVATARURL, "");

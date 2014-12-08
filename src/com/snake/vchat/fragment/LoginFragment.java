@@ -1,5 +1,6 @@
 package com.snake.vchat.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.snake.vchat.R;
+import com.snake.vchat.activity.RegisterActivity;
 import com.snake.vchat.pojo.LoginAO;
 import com.snake.vchat.task.LoginTask;
 import com.snake.vchat.task.MultiThreadingAsyncTask;
@@ -24,6 +26,7 @@ public class LoginFragment extends BaseFragment{
 	private EditText mUsername;
 	private EditText mPassword;
 	private Button mLogin;
+	private Button mRegister;
 	private LoginAO mLoginAO = new LoginAO();
 	
 	
@@ -43,11 +46,13 @@ public class LoginFragment extends BaseFragment{
 		mUsername = (EditText) findViewById(R.id.et_username);
 		mPassword = (EditText) findViewById(R.id.et_password);
 		mLogin = (Button) findViewById(R.id.bt_login);
+		mRegister = (Button) findViewById(R.id.bt_register);
 	}
 
 
 	protected void init() {
 		mLogin.setOnClickListener(onClickListener);
+		mRegister.setOnClickListener(onClickListener);
 	}
 
 
@@ -63,6 +68,9 @@ public class LoginFragment extends BaseFragment{
 					LoginTask loginTask = new LoginTask(mLoginAO, getActivity(), true);
 					loginTask.executeOnExecutor(MultiThreadingAsyncTask.THREAD_POOL_EXECUTOR);
 				}
+				break;
+			case R.id.bt_register:
+				startActivity(new Intent(getActivity(), RegisterActivity.class));
 				break;
 			}
 

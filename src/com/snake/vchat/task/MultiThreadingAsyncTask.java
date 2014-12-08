@@ -25,7 +25,7 @@ import com.snake.vchat.R;
 public abstract class MultiThreadingAsyncTask<Params, Progress, Result> extends
 AsyncTask<Params, Progress, Object> {
 
-	private static final String TAG = "MultiThreadingAsyncTask";
+	private static final String TAG = MultiThreadingAsyncTask.class.getSimpleName();
 	public static final int ASYNCTASK_ERROR = -1;
 	public static final int ASYNCTASK_SUCCESS = 1;
 	/** 任务重试上限 */
@@ -153,16 +153,16 @@ AsyncTask<Params, Progress, Object> {
 					boolean isHandled = this.handleException((CLInvalidNetworkException) result);
 					if (isHandled) {
 						// this.showAlert("网络连接失败");
-						/*Toast.makeText(getContext(), getErrorMsg(),
-								Toast.LENGTH_LONG).show();*/
+						Toast.makeText(getContext(), getErrorMsg(),
+								Toast.LENGTH_LONG).show();
 					}
 					Log.e(TAG, "", (Exception) result);
 				} else if (result instanceof CLConnectionException) {
 					CLConnectionException connectionException = (CLConnectionException) result;
 					boolean isHandled = this.handleException(connectionException);
 					if (isHandled) {
-						/*Toast.makeText(getContext(), getErrorMsg(),
-								Toast.LENGTH_LONG).show();*/
+						Toast.makeText(getContext(), getErrorMsg(),
+								Toast.LENGTH_LONG).show();
 					}
 					Log.e(TAG, "", (Exception) result);
 				} else if (result instanceof Exception) {

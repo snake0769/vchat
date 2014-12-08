@@ -24,17 +24,16 @@ import com.snake.vchat.activity.FunctionHostActivity;
 import com.snake.vchat.manager.UserInfoManager;
 import com.snake.vchat.manager.XmppConnectionManager;
 import com.snake.vchat.pojo.LoginAO;
+import comsnake.vchat.throwable.ErrDescription;
 
-public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Void>{
+public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
 
 	public static final String TAG = RegisterTask.class.getSimpleName();
-	
-	private static final String ERR_SERVER_NO_RESPOND = "服务器未响应";
-	
+
 	private XMPPConnection mConnection;
 	private Activity mContext;
 	private LoginAO mLoginAO;
-	
+
 	public RegisterTask(LoginAO loginAO, Activity context) {
 		super(context);
 		init(loginAO, context);
@@ -50,11 +49,11 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Void>{
 		super(context, isShowLoading);
 		init(loginAO, context);
 	}
-	
-	
+
+
 	/**
 	 *  初始化
-	 * @param loginAO 登录信息
+	 * @param loginAO 注册信息
 	 * @param context activity上下文，用于执行UI线程操作
 	 */
 	private void init(LoginAO loginAO, Activity context){
@@ -63,12 +62,12 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Void>{
 		mLoginAO = loginAO;
 	}
 
-	
+
 	/**
-	 * 异步登录
+	 * 异步注册
 	 * */
 	@Override
-	protected Void doInBackground(Void params)
+	protected Integer doInBackground(Void params)
 			throws CLInvalidNetworkException, CLConnectionException {
 		try {
 			if(!mConnection.isConnected())
@@ -77,67 +76,73 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Void>{
 		} catch (XMPPException e) {
 			e.printStackTrace();
 			Looper.prepare();
-			Toast.makeText(mContext, ERR_SERVER_NO_RESPOND, Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
 			Looper.loop();
+			return ASYNCTASK_ERROR;
 		}
-		return null;
+		return ASYNCTASK_SUCCESS;
 	}
 
-	
+
 	/**
-	 * 登录完成后UI线程执行
+	 * 注册完成后UI线程执行
 	 * */
 	@Override
-	protected void doOnSuccess(Void result) {
-		VCard vcard = new VCard();
-		try {
-			vcard.load(mConnection);
-			mLoginAO.nickname = vcard.getNickName();
-			mLoginAO.email = vcard.getEmailHome();
-		} catch (XMPPException e) {
-			e.printStackTrace();
-		}
-		UserInfoManager.getInstance().updateUserInformation(mLoginAO);
-		mContext.startActivity(new Intent(mContext, FunctionHostActivity.class));
+	protected void doOnSuccess(Integer result) {
+		if(result == ASYNCTASK_SUCCESS)
+			mContext.finish();
 	}
-	
-	
+
+
 	/**
 	 * 注册
+	 * @throws XMPPException 
 	 */
 	private void register(){
 		if (mConnection == null)  
-	        return;  
-	    Registration reg = new Registration();  
-	    reg.setType(IQ.Type.SET);  
-	    reg.setTo(mConnection.getServiceName());  
-	    reg.setUsername(mLoginAO.username);// 注意这里createAccount注册时，参数是username，不是jid，是“@”前面的部分。  
-	    reg.setPassword(mLoginAO.password);  
-	    reg.addAttribute("android", "vchat_createUser_android");// 这边addAttribute不能为空，否则出错。所以做个标志是android手机创建的吧！！！！！  
-	    PacketFilter filter = new AndFilter(new PacketIDFilter(  
-	            reg.getPacketID()), new PacketTypeFilter(IQ.class));  
-	    PacketCollector collector = mConnection.getServiceName().createPacketCollector(filter);  
-	    ClientConServer.connection.sendPacket(reg);  
-	    IQ result = (IQ) collector.nextResult(SmackConfiguration  
-	            .getPacketReplyTimeout());  
-	    // Stop queuing results  
-	    collector.cancel();// 停止请求results（是否成功的结果）  
-	    if (result == null) {  
-	        Log.e("RegistActivity", "No response from server.");  
-	        return "0";  
-	    } else if (result.getType() == IQ.Type.RESULT) {  
-	        return "1";  
-	    } else { // if (result.getType() == IQ.Type.ERROR)  
-	        if (result.getError().toString().equalsIgnoreCase("conflict(409)")) {  
-	            Log.e("RegistActivity", "IQ.Type.ERROR: "  
-	                    + result.getError().toString());  
-	            return "2";  
-	        } else {  
-	            Log.e("RegistActivity", "IQ.Type.ERROR: "  
-	                    + result.getError().toString());  
-	            return "3";  
-	        }  
-	    }  
+			setErrorMsg(ErrDescription.ERR_CONNECTION_INVALID);  
+		Registration reg = new Registration();  
+		reg.setType(IQ.Type.SET);  
+		reg.setTo(mConnection.getServiceName());  
+		reg.setUsername(mLoginAO.username);// 注意这里createAccount注册时，参数是username，不是jid，是“@”前面的部分。  
+		reg.setPassword(mLoginAO.password);  
+		reg.addAttribute("android", "vchat_createUser_android");// 这边addAttribute不能为空，否则出错。所以做个标志是android手机创建的吧！！！！！  
+		PacketFilter filter = new AndFilter(new PacketIDFilter(  
+				reg.getPacketID()), new PacketTypeFilter(IQ.class));  
+		PacketCollector collector = mConnection.createPacketCollector(filter); 
+		mConnection.sendPacket(reg);
+		IQ result = (IQ) collector.nextResult(SmackConfiguration  
+				.getPacketReplyTimeout());  
+		// Stop queuing results  
+		collector.cancel();// 停止请求results（是否成功的结果）  
+
+		if (result == null) {  
+			setErrorMsg(ErrDescription.ERR_SERVER_NO_RESPOND);
+		} 
+		else if (result.getType() == IQ.Type.ERROR) {  
+			if (result.getError().toString().equalsIgnoreCase("conflict(409)")) {  
+				Log.e("RegistActivity", "IQ.Type.ERROR: "  + result.getError().toString());  
+				setErrorMsg(ErrDescription.ERR_ACCOUNT_EXITED);
+			} else {  
+				Log.e("RegistActivity", "IQ.Type.ERROR: "  + result.getError().toString());  
+				setErrorMsg(ErrDescription.ERR_REGISTER_FAILED);
+			} 
+		}
+		else if (result.getType() == IQ.Type.RESULT) {
+			Looper.prepare();
+			Toast.makeText(mContext, ErrDescription.SUC_REGITSER, Toast.LENGTH_SHORT).show();
+			Looper.loop();
+		}  
+
+		//设置用户信息
+		try {
+			VCard vCard = new VCard();
+			vCard.setJabberId(mLoginAO.jid);
+			vCard.setNickName(mLoginAO.nickname);
+			vCard.save(mConnection);
+		} catch (XMPPException e) {
+			e.printStackTrace();
+		}
 	}
-	
+
 }

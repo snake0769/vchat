@@ -1,8 +1,6 @@
 package com.snake.vchat.fragment;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.graphics.Bitmap;
@@ -19,16 +17,15 @@ import android.widget.TextView;
 import com.gt.cl.http.CLConnectionException;
 import com.gt.cl.http.CLInvalidNetworkException;
 import com.snake.vchat.R;
-import com.snake.vchat.activity.FunctionHostActivity;
 import com.snake.vchat.manager.ContactsManager;
-import com.snake.vchat.manager.ContactsManager.PhoneContact;
+import com.snake.vchat.pojo.PhoneContactAO;
 import com.snake.vchat.task.MultiThreadingAsyncTask;
 
 public class ContactsFragment extends BaseFragment{
 	public static final String TAG = ContactsFragment.class.getSimpleName();
 	
 	private ListView mContacts;
-	private ArrayList<PhoneContact> contactsList = new ArrayList<PhoneContact>();
+	private ArrayList<PhoneContactAO> contactsList = new ArrayList<PhoneContactAO>();
 	private ArrayList<Bitmap> avatarList = new ArrayList<Bitmap>();
 	
 	@Override

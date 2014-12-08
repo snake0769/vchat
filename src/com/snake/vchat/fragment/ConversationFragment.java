@@ -17,15 +17,14 @@ import android.widget.TextView;
 import com.gt.cl.http.CLConnectionException;
 import com.gt.cl.http.CLInvalidNetworkException;
 import com.snake.vchat.R;
-import com.snake.vchat.manager.ContactsManager;
-import com.snake.vchat.manager.ContactsManager.PhoneContact;
+import com.snake.vchat.pojo.PhoneContactAO;
 import com.snake.vchat.task.MultiThreadingAsyncTask;
 
 public class ConversationFragment extends BaseFragment{
 	public static final String TAG = ConversationFragment.class.getSimpleName();
 
 	private ListView mConversation;
-	private ArrayList<PhoneContact> conversationList = new ArrayList<PhoneContact>();
+	private ArrayList<PhoneContactAO> conversationList = new ArrayList<PhoneContactAO>();
 	private ArrayList<Bitmap> avatarList = new ArrayList<Bitmap>();
 
 	@Override

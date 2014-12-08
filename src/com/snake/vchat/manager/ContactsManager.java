@@ -104,7 +104,7 @@ public class ContactsManager extends BaseManager{
 	 * 获得所有联系人列表
 	 * @return
 	 */
-	public List<UserAO> getContacts(XMPPConnection connection) {
+/*	public List<UserAO> getContacts(XMPPConnection connection) {
 		for (RosterEntry entry : connection.getRoster().getEntries()) {
 			entry
 		}
@@ -113,7 +113,7 @@ public class ContactsManager extends BaseManager{
 			throw new RuntimeException("contacts is null");
 
 		return userList;
-	}
+	}*/
 	
 	
 	

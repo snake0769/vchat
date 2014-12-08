@@ -11,7 +11,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.snake.vchat.R;
+import com.snake.vchat.app.Constants;
 import com.snake.vchat.manager.XmppConnectionManager;
+import com.snake.vchat.pojo.LoginAO;
+import com.snake.vchat.task.MultiThreadingAsyncTask;
 import com.snake.vchat.task.RegisterTask;
 
 public class RegisterActivity extends BaseActivity{
@@ -20,8 +23,8 @@ public class RegisterActivity extends BaseActivity{
 	private EditText mUsername;
 	private EditText mPassword;
 	private EditText mConfirmPassword;
+	private EditText mNickname;
 	private Button mSubmit;
-	private XMPPConnection mConnection;
 
 
 	@Override
@@ -40,6 +43,7 @@ public class RegisterActivity extends BaseActivity{
 		mUsername = (EditText) findViewById(R.id.et_username);
 		mPassword = (EditText) findViewById(R.id.et_password);
 		mConfirmPassword = (EditText) findViewById(R.id.et_confirmPassword);
+		mNickname = (EditText) findViewById(R.id.et_nickname);
 		mSubmit = (Button) findViewById(R.id.bt_submit);
 	}
 
@@ -47,29 +51,38 @@ public class RegisterActivity extends BaseActivity{
 	@Override
 	protected void init() {
 		mSubmit.setOnClickListener(onClickListener);
-		mConnection = XmppConnectionManager.getInstance().getConnection();
 	}
 
 
 	private OnClickListener onClickListener = new OnClickListener(){
-
 		@Override
 		public void onClick(View v) {
 			switch (v.getId()) {
 			case R.id.bt_submit:
-					RegisterTask registerTask  = new Register();
-
+				if(confirm()){
+					LoginAO loginAO = new LoginAO();
+					loginAO.username = mUsername.getText().toString().trim();
+					loginAO.password = mPassword.getText().toString().trim();
+					loginAO.nickname = mNickname.getText().toString().trim();
+					loginAO.jid = loginAO.username + "@" +Constants.XMPP_SERVER_NAME;
+					RegisterTask registerTask  = new RegisterTask(loginAO, RegisterActivity.this, true);
+					registerTask.executeOnExecutor(MultiThreadingAsyncTask.THREAD_POOL_EXECUTOR);
+				}
 				break;
 			}
 		}
 
 	};
 
-	
+
 	/**
-	 * 注册
+	 * 验证注册信息
 	 */
-	private void register(){
-		
+	private boolean confirm(){
+		if(mPassword.getText().toString().trim().equals(
+				mConfirmPassword.getText().toString().trim()))
+			return true;
+		else
+			return false;
 	}
 }
