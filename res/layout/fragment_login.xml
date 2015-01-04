@@ -23,13 +23,17 @@
             android:id="@+id/et_username"
             style="@style/loginText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" 
+            android:inputType="phone"
+            android:text="15999999010"/>
 
         <EditText
             android:id="@+id/et_password"
             style="@style/loginText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" 
+            android:inputType="textPassword"
+            android:text="qwe"/>
         
         <Button
             android:id="@+id/bt_login"

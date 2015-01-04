@@ -168,8 +168,6 @@ AsyncTask<Params, Progress, Object> {
 				} else if (result instanceof Exception) {
 					boolean isHandled = this.handleException((Exception) result);
 					if (!isHandled) {
-						Toast.makeText(getContext(),((Exception) result).getMessage(),
-								Toast.LENGTH_LONG).show();
 						// this.showAlert(((Exception) result).getMessage());
 					}
 					Log.e(TAG, "", (Exception) result);

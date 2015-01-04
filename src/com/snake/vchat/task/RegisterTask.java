@@ -21,12 +21,13 @@ import android.widget.Toast;
 import com.gt.cl.http.CLConnectionException;
 import com.gt.cl.http.CLInvalidNetworkException;
 import com.snake.vchat.activity.FunctionHostActivity;
+import com.snake.vchat.app.Constants;
 import com.snake.vchat.manager.UserInfoManager;
 import com.snake.vchat.manager.XmppConnectionManager;
 import com.snake.vchat.pojo.LoginAO;
 import comsnake.vchat.throwable.ErrDescription;
 
-public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
+public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Exception>{
 
 	public static final String TAG = RegisterTask.class.getSimpleName();
 
@@ -65,22 +66,19 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
 
 	/**
 	 * 异步注册
+	 * @throws XMPPException 
 	 * */
 	@Override
-	protected Integer doInBackground(Void params)
+	protected Exception doInBackground(Void params)
 			throws CLInvalidNetworkException, CLConnectionException {
 		try {
 			if(!mConnection.isConnected())
 				mConnection.connect();
 			register();
 		} catch (XMPPException e) {
-			e.printStackTrace();
-			Looper.prepare();
-			Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
-			Looper.loop();
-			return ASYNCTASK_ERROR;
+			return e;
 		}
-		return ASYNCTASK_SUCCESS;
+		return null;
 	}
 
 
@@ -88,9 +86,11 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
 	 * 注册完成后UI线程执行
 	 * */
 	@Override
-	protected void doOnSuccess(Integer result) {
-		if(result == ASYNCTASK_SUCCESS)
+	protected void doOnSuccess(Exception result) {
+		if(result == null){
+			Toast.makeText(mContext, ErrDescription.SUC_REGITSER, Toast.LENGTH_SHORT).show();
 			mContext.finish();
+		}
 	}
 
 
@@ -98,7 +98,7 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
 	 * 注册
 	 * @throws XMPPException 
 	 */
-	private void register(){
+	private void register() throws XMPPException{
 		if (mConnection == null)  
 			setErrorMsg(ErrDescription.ERR_CONNECTION_INVALID);  
 		Registration reg = new Registration();  
@@ -117,32 +117,37 @@ public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Integer>{
 		collector.cancel();// 停止请求results（是否成功的结果）  
 
 		if (result == null) {  
-			setErrorMsg(ErrDescription.ERR_SERVER_NO_RESPOND);
+			throw new XMPPException(ErrDescription.ERR_SERVER_NO_RESPOND);
 		} 
 		else if (result.getType() == IQ.Type.ERROR) {  
 			if (result.getError().toString().equalsIgnoreCase("conflict(409)")) {  
 				Log.e("RegistActivity", "IQ.Type.ERROR: "  + result.getError().toString());  
-				setErrorMsg(ErrDescription.ERR_ACCOUNT_EXITED);
+				throw new XMPPException(ErrDescription.ERR_ACCOUNT_EXITED);
 			} else {  
 				Log.e("RegistActivity", "IQ.Type.ERROR: "  + result.getError().toString());  
-				setErrorMsg(ErrDescription.ERR_REGISTER_FAILED);
+				throw new XMPPException(ErrDescription.ERR_REGISTER_FAILED);
 			} 
 		}
-		else if (result.getType() == IQ.Type.RESULT) {
-			Looper.prepare();
-			Toast.makeText(mContext, ErrDescription.SUC_REGITSER, Toast.LENGTH_SHORT).show();
-			Looper.loop();
-		}  
 
 		//设置用户信息
-		try {
-			VCard vCard = new VCard();
-			vCard.setJabberId(mLoginAO.jid);
-			vCard.setNickName(mLoginAO.nickname);
-			vCard.save(mConnection);
-		} catch (XMPPException e) {
-			e.printStackTrace();
-		}
+		mConnection.login(mLoginAO.username, mLoginAO.password);
+		VCard vCard = new VCard();
+		vCard.load(mConnection);
+		vCard.setNickName(mLoginAO.nickname);
+		vCard.save(mConnection);
+		mConnection.disconnect();
 	}
 
+	
+	/** 
+	 * 异常处理
+	 */
+	@Override
+	protected boolean handleException(Exception ex) {
+		Toast.makeText(getContext(),ex.getMessage(),Toast.LENGTH_LONG).show();
+		return true;
+	}
+
+	
+	
 }

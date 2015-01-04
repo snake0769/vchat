@@ -7,8 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterGroup;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smackx.packet.VCard;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -24,7 +28,7 @@ import com.snake.vchat.pojo.UserAO;
 
 public class ContactsManager extends BaseManager{
 	public static final String TAG = ContactsManager.class.getSimpleName();
-	
+
 	/**获取库Phon表字段**/  
 	private static final String[] PHONES_PROJECTION = new String[] {  
 		Phone.DISPLAY_NAME, Phone.NUMBER, Photo.PHOTO_ID,Phone.CONTACT_ID };  
@@ -37,12 +41,14 @@ public class ContactsManager extends BaseManager{
 	/**联系人的ID**/  
 	private static final int PHONES_CONTACT_ID_INDEX = 3;  
 
-	private List<UserAO> mContacts = new ArrayList<UserAO>();
-
+	private Map<String, List<UserAO>> mContacts = new HashMap<String, List<UserAO>>();
+	private List<UserAO> mUsers = new ArrayList<UserAO>();
+	private XMPPConnection mConnection;
 
 	private static ContactsManager mInstance;
 
 	private ContactsManager(){
+		mConnection = XmppConnectionManager.getInstance().getConnection();
 	}
 
 	public static ContactsManager getInstance(){
@@ -51,7 +57,7 @@ public class ContactsManager extends BaseManager{
 		return mInstance;
 	}
 
-	
+
 	/**
 	 * 获取手机通讯录
 	 * @return
@@ -94,28 +100,53 @@ public class ContactsManager extends BaseManager{
 				contacts.add(contact);
 			}  
 			phoneCursor.close();  
-			
+
 		}  
 		return contacts;
 	} 
 
-	
+
 	/**
-	 * 获得所有联系人列表
+	 * 获得所有联系人列表（带分组）
 	 * @return
 	 */
-/*	public List<UserAO> getContacts(XMPPConnection connection) {
-		for (RosterEntry entry : connection.getRoster().getEntries()) {
-			entry
-		}
+	public Map<String, List<UserAO>> getContacts() {
+		Roster roster = mConnection.getRoster();
 		
-		if (mContacts == null)
-			throw new RuntimeException("contacts is null");
+		if(roster != null){
+			for (RosterGroup group : roster.getGroups()) {
+				String groupName = group.getName();
+				List<UserAO> groupUsers = new ArrayList<UserAO>();
+				for(RosterEntry entry : group.getEntries()){
+					UserAO user = new UserAO(entry, mConnection);
+					groupUsers.add(user);
+				}
+				mContacts.put(groupName, groupUsers);
+			}
+		}else{
+			throw new RuntimeException("roster is null");
+		}
 
-		return userList;
-	}*/
-	
-	
-	
-	
+		return mContacts;
+	}
+
+
+	/**
+	 * 获得所有联系人列表(不带分组)
+	 * @return
+	 */
+	public List<UserAO> getUsers() {
+		Roster roster = mConnection.getRoster();
+
+		if(roster != null){
+			for(RosterEntry entry : roster.getEntries()){
+				UserAO user = new UserAO(entry, mConnection);
+				mUsers.add(user);
+			}
+		}else{
+			throw new RuntimeException("roster is null");
+		}
+
+		return mUsers;
+	}
 }

@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 import junit.framework.Assert;
 import android.content.Context;
@@ -291,5 +292,21 @@ public class Util {
         Editor editor = sp.edit();
         editor.putString("bind_flag", flagStr);
         editor.commit();
+    }
+    
+    
+    
+    /**
+     * 回收图片资源
+     * @param bmpList 待回收图片列表
+     */
+    public static void recycleBitmaps(List<Bitmap> bmpList){
+    	for(Bitmap bmp:bmpList){
+    		if(bmp==null)
+    			continue;
+    		else if(!bmp.isRecycled())
+    			bmp.recycle();
+    		bmp = null;
+    	}
     }
 }
