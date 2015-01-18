@@ -54,20 +54,14 @@ public class LoginTask extends MultiThreadingAsyncTask<Void, Void, Void>{
 	}
 
 	
-	/**异步登录*/
+	/**异步登录
+	 * @throws XMPPException */
 	@Override
 	protected Void doInBackground(Void params)
-			throws CLInvalidNetworkException, CLConnectionException {
-		try {
+			throws CLInvalidNetworkException, CLConnectionException, XMPPException {
 			if(!mConnection.isConnected())
 				mConnection.connect();
 			mConnection.login(mLoginAO.username, mLoginAO.password);
-		} catch (XMPPException e) {
-			e.printStackTrace();
-			Looper.prepare();
-			Toast.makeText(mContext, ERR_AUTHORITY, Toast.LENGTH_SHORT).show();
-			Looper.loop();
-		}
 		return null;
 	}
 
@@ -86,6 +80,15 @@ public class LoginTask extends MultiThreadingAsyncTask<Void, Void, Void>{
 		UserInfoManager.getInstance().updateUserInformation(mLoginAO);
 		mContext.startActivity(new Intent(mContext, FunctionHostActivity.class));
 	}
+
+	
+	@Override
+	protected boolean handleException(Exception ex) {
+		if(ex instanceof XMPPException)
+			Toast.makeText(mContext, ERR_AUTHORITY, Toast.LENGTH_SHORT).show();
+		return super.handleException(ex);
+	}
+	
 	
 	
 }

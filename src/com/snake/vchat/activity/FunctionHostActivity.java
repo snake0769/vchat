@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,6 +22,8 @@ import android.widget.RadioGroup.OnCheckedChangeListener;
 import com.snake.vchat.R;
 import com.snake.vchat.fragment.ContactsFragment;
 import com.snake.vchat.fragment.ConversationFragment;
+import com.snake.vchat.manager.MessageManager;
+import com.snake.vchat.service.ChatService;
 
 public class FunctionHostActivity extends FragmentActivity{
 public static final String TAG = FunctionHostActivity.class.getSimpleName();
@@ -66,6 +69,10 @@ private ContactsFragment mContacts;
 		topTabPageAdapter.setList(mPageList);
 		mRoot.setAdapter(topTabPageAdapter);
 		mRoot.setOnPageChangeListener(onPageChangeListener);
+		
+		//启动消息服务
+		MessageManager.getInstance().start();
+		
 		/*mConversationBtn.setOnClickListener(onClickListener);
 		mContactsBtn.setOnClickListener(onClickListener);*/
 		mFuction.setOnCheckedChangeListener(new OnCheckedChangeListener() {

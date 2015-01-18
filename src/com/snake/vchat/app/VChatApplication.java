@@ -5,9 +5,10 @@ import org.jivesoftware.smack.SmackAndroid;
 import android.app.Application;
 
 import com.snake.vchat.manager.ContactsManager;
+import com.snake.vchat.manager.MessageManager;
 import com.snake.vchat.manager.UserInfoManager;
 import com.snake.vchat.manager.XmppConnectionManager;
-import comsnake.vchat.throwable.CrashHandler;
+import com.snake.vchat.throwable.CrashHandler;
 
 public class VChatApplication extends Application{
 
@@ -27,9 +28,11 @@ public class VChatApplication extends Application{
 		initInstance();
 		//aSmack 初始化
 		SmackAndroid.init(this);
+		//初始化manager
 		XmppConnectionManager.getInstance().init();
 		UserInfoManager.getInstance().init(this);
 		ContactsManager.getInstance().init(this);
+		MessageManager.getInstance().init(this);
 	}
 
 	

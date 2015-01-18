@@ -10,12 +10,15 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.packet.VCard;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 import com.gt.cl.http.CLConnectionException;
 import com.gt.cl.http.CLInvalidNetworkException;
 import com.snake.vchat.R;
+import com.snake.vchat.activity.ChatActivity;
 import com.snake.vchat.manager.ContactsManager;
 import com.snake.vchat.manager.XmppConnectionManager;
 import com.snake.vchat.pojo.PhoneContactAO;
@@ -54,6 +58,7 @@ public class ContactsFragment extends BaseFragment{
 	protected void findViews() {
 		mContacts = (ListView) findViewById(R.id.lv_contacts);
 		mContacts.setAdapter(contactsAdapter);
+		mContacts.setOnItemClickListener(onItemClickListener);
 	}
 
 	
@@ -76,6 +81,18 @@ public class ContactsFragment extends BaseFragment{
 			}
 		}.executeOnExecutor(MultiThreadingAsyncTask.THREAD_POOL_EXECUTOR);
 	}
+	
+	
+	private OnItemClickListener onItemClickListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			Intent intent = new Intent(getActivity(), ChatActivity.class);
+			intent.putExtra(ChatActivity.USER, mUsers.get(arg2));
+			startActivity(intent);
+		}
+	};
 	
 	
 	private BaseAdapter contactsAdapter  = new BaseAdapter() {

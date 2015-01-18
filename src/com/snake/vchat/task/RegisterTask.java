@@ -13,19 +13,14 @@ import org.jivesoftware.smack.packet.Registration;
 import org.jivesoftware.smackx.packet.VCard;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.gt.cl.http.CLConnectionException;
 import com.gt.cl.http.CLInvalidNetworkException;
-import com.snake.vchat.activity.FunctionHostActivity;
-import com.snake.vchat.app.Constants;
-import com.snake.vchat.manager.UserInfoManager;
 import com.snake.vchat.manager.XmppConnectionManager;
 import com.snake.vchat.pojo.LoginAO;
-import comsnake.vchat.throwable.ErrDescription;
+import com.snake.vchat.throwable.ErrDescription;
 
 public class RegisterTask extends MultiThreadingAsyncTask<Void, Void, Exception>{
 

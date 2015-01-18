@@ -36,10 +36,7 @@ public class SqliteHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		try{
-		/*db.execSQL(ZoneDao.CREATE_TABLE);
-		db.execSQL(ZoneDao.CREATE_TABLE_DEF);
-		db.execSQL(ShopTypeDao.CREATE_TABLE);
-		ZoneDao.getInstance().makeDefaultZones(db);*/
+		db.execSQL(MessageDao.CREATE_TABLE);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -48,9 +45,6 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		/*db.execSQL(AdverImageDao.ADD_NEW_COLUMN_TABLE);
-		db.execSQL(AdverImageTempDao.ADD_NEW_COLUMN_TABLE);
-		db.execSQL(UpdateAdverinfoDBO.ADD_NEW_COLUMN_TABLE);*/
 	}
 
 }

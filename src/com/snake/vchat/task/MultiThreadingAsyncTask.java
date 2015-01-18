@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jivesoftware.smack.XMPPException;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -190,7 +192,7 @@ AsyncTask<Params, Progress, Object> {
 	}
 
 	abstract protected Result doInBackground(Params params)
-			throws CLInvalidNetworkException, CLConnectionException;
+			throws CLInvalidNetworkException, CLConnectionException, XMPPException;
 
 	abstract protected void doOnSuccess(Result result);
 

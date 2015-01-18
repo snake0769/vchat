@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="formSpacing">6dp</dimen>
+    <dimen name="msgPadding">6dp</dimen>
+    <dimen name="msgAvatarSize">60dp</dimen>
 </resources>

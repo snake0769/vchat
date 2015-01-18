@@ -33,11 +33,12 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewParent;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.Scroller;
@@ -50,9 +51,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private int mRightViewIndex = 0;
     protected int mCurrentX;
     protected int mNextX;
-    private int mSelecetdItemPosition = 0;
-    private int mLastSelectedItemPosition =0;
-    private View mLastSeletedItem;
     private int mMaxX = Integer.MAX_VALUE;
     
     private int mDisplayOffset = 0;//每个Item的X显示偏移量
@@ -62,30 +60,25 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private OnItemSelectedListener mOnItemSelected;
     private OnItemClickListener mOnItemClicked;
     private OnItemLongClickListener mOnItemLongClicked;
-    private OnItemSelectedCancelListener mOnItemSelectedCancel;
     private boolean mDataChanged = false;
-    
-    private float x;
-	private float y;
 
 
     public HorizontalListView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        WindowManager windowManager = (WindowManager) context  
+                .getSystemService(context.WINDOW_SERVICE);  
+        DisplayMetrics outMetrics=new DisplayMetrics();  
+        windowManager.getDefaultDisplay().getMetrics(outMetrics);  
+        mDisplayOffset=outMetrics.widthPixels; 
         initView();
-    }
-    
-    public interface OnItemSelectedCancelListener {
-
-        boolean onItemSelectedCancel(AdapterView<?> parent, View view, int position, long id);
     }
 
     private synchronized void initView() {
         mLeftViewIndex = -1;
         mRightViewIndex = 0;
-        mDisplayOffset = 0;
+        //mDisplayOffset = 0;
         mCurrentX = 0;
         mNextX = 0;
-        mSelecetdItemPosition = 0;
         mMaxX = Integer.MAX_VALUE;
         mScroller = new Scroller(getContext());
         mGesture = new GestureDetector(getContext(), mOnGesture);
@@ -94,10 +87,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     @Override
     public void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener) {
         mOnItemSelected = listener;
-    }
-    
-    public void setOnItemSelectedCancelListener(OnItemSelectedCancelListener listener) {
-    	mOnItemSelectedCancel = listener;
     }
 
     @Override
@@ -143,10 +132,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     public View getSelectedView() {
         return null;
     }
-    
-    public int getSelectedItemPosition(){
-    	return this.mSelecetdItemPosition;
-    }
 
     @Override
     public void setAdapter(ListAdapter adapter) {
@@ -157,9 +142,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         mAdapter.registerDataSetObserver(mDataObserver);
         reset();
     }
-    
-    
-
 
     private synchronized void reset(){
         initView();
@@ -167,22 +149,15 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         requestLayout();
     }
 
-    
+    @Override
     public void setSelection(int position) {
-    	mSelecetdItemPosition = position;
-    	View child = getChildAt(position);	
-    	if(mOnItemSelected != null){
-        	if(mLastSelectedItemPosition != mSelecetdItemPosition){
-        		if(mOnItemSelectedCancel!=null)
-        			mOnItemSelectedCancel.onItemSelectedCancel(HorizontalListView.this, mLastSeletedItem, mLastSelectedItemPosition, mAdapter.getItemId( mLastSelectedItemPosition ));
-        		mOnItemSelected.onItemSelected(HorizontalListView.this, child, mSelecetdItemPosition, mAdapter.getItemId( mSelecetdItemPosition ));
-        		mLastSelectedItemPosition = mSelecetdItemPosition;
-        		mLastSeletedItem = child;
-        	}
-            
-        }
+        //TODO: implement
     }
 
+    
+    /**
+     * 计算并添加一个child item到viewgroup视图中（视野内）
+     */
     private void addAndMeasureChild(final View child, int viewPos) {
         LayoutParams params = child.getLayoutParams();
         if(params == null) {
@@ -207,6 +182,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             return;
         }
 
+        //mNextX和mCurrentX分别记录scroller相对绝对原点X坐标的位置(即初始X坐标)
         if(mDataChanged){
             int oldCurrentX = mCurrentX;
             initView();
@@ -215,11 +191,13 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             mDataChanged = false;
         }
 
+        //scroller滚动停止时，记录新的scroller X坐标
         if(mScroller.computeScrollOffset()){
             int scrollx = mScroller.getCurrX();
             mNextX = scrollx;
         }
 
+        //限制scroller的滚动位置，防止X溢出报错
         if(mNextX <= 0){
             mNextX = 0;
             mScroller.forceFinished(true);
@@ -231,6 +209,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
         int dx = mCurrentX - mNextX;
 
+        //移除滚动过程后不再视野范围的items(超出左边+右边)
         removeNonVisibleItems(dx);
         fillList(dx);
         positionItems(dx);
@@ -266,8 +245,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         if(child != null) {
             edge = child.getLeft();
         }
-        fillListLeft(edge, dx);
-
+       fillListLeft(edge, dx);
 
     }
 
@@ -337,13 +315,14 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
      */
     private void positionItems(final int dx) {
         if(getChildCount() > 0){
+        	//child的X坐标是绝对坐标而不是相对ListView的坐标，所以需要mDisplayOffset偏移
             mDisplayOffset += dx;
-            int left = mDisplayOffset;
+            int right = mDisplayOffset;
             for(int i=0;i<getChildCount();i++){
                 View child = getChildAt(i);
                 int childWidth = child.getMeasuredWidth();
-                child.layout(left, 0, left + childWidth, child.getMeasuredHeight());
-                left += childWidth + child.getPaddingRight();
+                child.layout(right-childWidth, 0, right, child.getMeasuredHeight());
+                right -= childWidth + child.getPaddingRight();
             }
         }
     }
@@ -355,27 +334,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-    	//分开什么时候parent事件有效，什么时候child事件有效  
-    			ViewParent mViewParent = this.getParent();
-    			final int action = ev.getAction();
-    			switch (action) {
-    			case MotionEvent.ACTION_DOWN:
-    				x = ev.getX();
-    				y = ev.getY();
-    				mViewParent.requestDisallowInterceptTouchEvent(true);
-    				break;
-    			case MotionEvent.ACTION_MOVE:
-    				if (Math.abs(ev.getX() - x) > 10)
-    					mViewParent.requestDisallowInterceptTouchEvent(true);
-    				else if (Math.abs(ev.getY() - y) > 10)
-    					mViewParent.requestDisallowInterceptTouchEvent(false);
-    				break;
-    			case MotionEvent.ACTION_UP:
-    			case MotionEvent.ACTION_CANCEL:
-    				mViewParent.requestDisallowInterceptTouchEvent(false);
-    				break;
-    			}
-    			
         boolean handled = super.dispatchTouchEvent(ev);
         handled |= mGesture.onTouchEvent(ev);
         return handled;
@@ -423,8 +381,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-        	if(mLastSeletedItem==null)
-        		mLastSeletedItem = getChildAt(0);
             for(int i=0;i<getChildCount();i++){
                 View child = getChildAt(i);
                 if (isEventWithinView(e, child)) {
@@ -432,20 +388,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                         mOnItemClicked.onItemClick(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
                     }
                     if(mOnItemSelected != null){
-                    	
-                    	/*if(getFirstVisiblePosition() <= mSelecetdItemPosition && getLastVisiblePosition() >= mSelecetdItemPosition){
-                    		if(mOnItemSelectedCancel!=null)
-                    			mOnItemSelectedCancel.onItemSelectedCancel(HorizontalListView.this, child, mSelecetdItemPosition, mAdapter.getItemId( mSelecetdItemPosition ));
-                    	}*/
-                    	mSelecetdItemPosition = mLeftViewIndex + 1 + i;
-                    	if(mLastSelectedItemPosition != mSelecetdItemPosition){
-                    		if(mOnItemSelectedCancel!=null)
-                    			mOnItemSelectedCancel.onItemSelectedCancel(HorizontalListView.this, mLastSeletedItem, mLastSelectedItemPosition, mAdapter.getItemId( mLastSelectedItemPosition ));
-                    		mOnItemSelected.onItemSelected(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
-                    		mLastSelectedItemPosition = mSelecetdItemPosition;
-                    		mLastSeletedItem = child;
-                    	}
-                        
+                        mOnItemSelected.onItemSelected(HorizontalListView.this, child, mLeftViewIndex + 1 + i, mAdapter.getItemId( mLeftViewIndex + 1 + i ));
                     }
                     break;
                 }
@@ -481,7 +424,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             return viewRect.contains((int) e.getRawX(), (int) e.getRawY());
         }
     };
-
 
 
 
