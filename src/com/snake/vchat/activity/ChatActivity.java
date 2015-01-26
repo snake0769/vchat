@@ -3,14 +3,22 @@ package com.snake.vchat.activity;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,17 +37,18 @@ import com.snake.vchat.app.Constants;
 import com.snake.vchat.component.HorizontalListView;
 import com.snake.vchat.component.TextViewVertical;
 import com.snake.vchat.manager.MessageManager;
+import com.snake.vchat.manager.XmppConnectionManager;
 import com.snake.vchat.pojo.MessageAO;
 import com.snake.vchat.pojo.UserAO;
 import com.snake.vchat.task.MultiThreadingAsyncTask;
 
 public class ChatActivity extends BaseActivity{
 	public static final String TAG = ChatActivity.class.getSimpleName();
-	
+
 	public static final String USER = "user";
 
 	private UserAO mUser;
-	private HorizontalListView mChat;
+	private HorizontalListView mChatList;
 	private LinkedList<MessageAO> messageList = new LinkedList<MessageAO>();
 	private ArrayList<Bitmap> avatarList = new ArrayList<Bitmap>();
 	private EditText mInputBox;
@@ -47,8 +56,11 @@ public class ChatActivity extends BaseActivity{
 	private MessageManager messageManager;
 	private MyReceiver mRecevier;
 	private IntentFilter intentFilter;
-	
-/*	private Handler mHandler = new Handler(){
+	private XMPPConnection mConnection;
+	private ChatManager chatManager;
+	private Chat mChat;
+
+	/*	private Handler mHandler = new Handler(){
 
 		@Override
 		public void handleMessage(Message msg) {
@@ -59,10 +71,10 @@ public class ChatActivity extends BaseActivity{
 			}
 			super.handleMessage(msg);
 		}
-		
+
 	};*/
-	
-	
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -72,8 +84,8 @@ public class ChatActivity extends BaseActivity{
 		findViews();
 		init();
 	}
-	
-	
+
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -91,7 +103,7 @@ public class ChatActivity extends BaseActivity{
 
 	@Override
 	protected void findViews() {
-		mChat = (HorizontalListView) findViewById(R.id.lv_chat);
+		mChatList = (HorizontalListView) findViewById(R.id.lv_chat);
 		mInputBox = (EditText) findViewById(R.id.et_message);
 		mOperation = (TextView) findViewById(R.id.tv_operation);
 	}
@@ -102,26 +114,76 @@ public class ChatActivity extends BaseActivity{
 		mUser = getIntent().getParcelableExtra(USER);
 		messageManager = MessageManager.getInstance();
 		mOperation.setOnClickListener(onClickListener);
-		mChat.setAdapter(messageAdapter);
-		
+		mInputBox.addTextChangedListener(inputWatcher);
+		mChatList.setAdapter(messageAdapter);
+
 		mRecevier = new MyReceiver();
 		intentFilter = new IntentFilter();
 		intentFilter.addAction(Constants.ACTION_NEWMESSAGE);
+
+		//添加聊天监听
+		mConnection = XmppConnectionManager.getInstance().getConnection();
+		chatManager = mConnection.getChatManager();
+		mChat = chatManager.createChat(mUser.jid, messageListener);
 	}
 
 
 	private OnClickListener onClickListener = new OnClickListener() {
-		
+
 		@Override
 		public void onClick(View v) {
 			switch(v.getId()){
 			case R.id.tv_operation:
+				try {
+					String msgText = mInputBox.getText().toString();
+					mChat.sendMessage(msgText);
+					MessageAO newMsg = new MessageAO();
+					newMsg.from = "me";
+					newMsg.to = mUser.jid;
+					newMsg.content = msgText;
+				} catch (XMPPException e) {
+					e.printStackTrace();
+				}
 				break;
 			}
 		}
 	};
-	
-	
+
+
+	private TextWatcher inputWatcher = new TextWatcher() {
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			if(s.equals(""))
+				mOperation.setEnabled(false);
+			else
+				mOperation.setEnabled(true);
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		@Override
+		public void afterTextChanged(Editable s) {
+		}
+	};
+
+
+	/**
+	 * 聊天消息监听
+	 */
+	private MessageListener messageListener = new MessageListener() {
+		/** 
+		 * 处理设置该listener后到来的消息
+		 */
+		@Override
+		public void processMessage(Chat arg0,org.jivesoftware.smack.packet.Message arg1) {
+		}
+	};
+
+
 	/**
 	 * 获取最近的聊天记录
 	 */
@@ -140,8 +202,8 @@ public class ChatActivity extends BaseActivity{
 			}
 		}.executeOnExecutor(MultiThreadingAsyncTask.THREAD_POOL_EXECUTOR);
 	}
-	
-	
+
+
 	private BaseAdapter messageAdapter  = new BaseAdapter() {
 
 		class ViewHolder{
@@ -192,11 +254,13 @@ public class ChatActivity extends BaseActivity{
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			//取出最新收到的聊天消息
-			String user = intent.getStringExtra(USER);
-			messageList.add(messageManager.getNewMessage(user));
-			messageAdapter.notifyDataSetChanged();
+			/*String user = intent.getStringExtra(USER);
+			if(mChat == null){
+				messageList.add(messageManager.getNewMessage(user));
+				messageAdapter.notifyDataSetChanged();
+			}*/
 		}
-		
+
 	}
 
 }

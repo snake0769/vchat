@@ -66,7 +66,6 @@ public class MessageManager extends BaseManager{
 	}
 	
 	
-	
 	/**
 	 * 加载指定聊天对象的聊天消息
 	 * @param target
@@ -85,5 +84,6 @@ public class MessageManager extends BaseManager{
 	public MessageAO getNewMessage(String target){
 		return MessageDao.getInstance().getMessage(target).getLast();
 	}
+
 
 }
