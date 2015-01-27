@@ -89,7 +89,7 @@ public class ChatActivity extends BaseActivity{
 	@Override
 	protected void onResume() {
 		super.onResume();
-		getRecentMessage();
+		//getRecentMessage();
 		registerReceiver(mRecevier, intentFilter);
 	}
 
@@ -136,11 +136,19 @@ public class ChatActivity extends BaseActivity{
 			case R.id.tv_operation:
 				try {
 					String msgText = mInputBox.getText().toString();
+					if(msgText.equals("cc")){
+						messageList.clear();
+						messageAdapter.notifyDataSetChanged();
+						return;
+					}
 					mChat.sendMessage(msgText);
 					MessageAO newMsg = new MessageAO();
 					newMsg.from = "me";
 					newMsg.to = mUser.jid;
 					newMsg.content = msgText;
+					messageList.add(newMsg);
+					messageAdapter.notifyDataSetChanged();
+					MessageManager.getInstance().saveMessage(newMsg);
 				} catch (XMPPException e) {
 					e.printStackTrace();
 				}
@@ -154,10 +162,6 @@ public class ChatActivity extends BaseActivity{
 
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before, int count) {
-			if(s.equals(""))
-				mOperation.setEnabled(false);
-			else
-				mOperation.setEnabled(true);
 		}
 
 		@Override
@@ -167,6 +171,11 @@ public class ChatActivity extends BaseActivity{
 
 		@Override
 		public void afterTextChanged(Editable s) {
+			if(s.toString().equals(""))
+				mOperation.setEnabled(false);
+			else{
+				mOperation.setEnabled(true);
+			}
 		}
 	};
 
@@ -180,6 +189,13 @@ public class ChatActivity extends BaseActivity{
 		 */
 		@Override
 		public void processMessage(Chat arg0,org.jivesoftware.smack.packet.Message arg1) {
+			Log.i(TAG, arg1.getBody());
+			MessageAO newMsg = new MessageAO();
+			newMsg.from = arg1.getFrom();
+			newMsg.to = "me";
+			newMsg.content = arg1.getBody();
+			messageList.add(newMsg);
+			messageAdapter.notifyDataSetChanged();
 		}
 	};
 
@@ -214,14 +230,12 @@ public class ChatActivity extends BaseActivity{
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder viewholder = new ViewHolder();
-			if(convertView == null){
+			if(messageList.get(position).from.equals("me"))
+				convertView = LayoutInflater.from(ChatActivity.this).inflate(R.layout.item_chat_me, null);
+			else
 				convertView = LayoutInflater.from(ChatActivity.this).inflate(R.layout.item_chat_other, null);
-				//viewholder.avatar = (ImageView) convertView.findViewById(R.id.iv_avatar);
-				viewholder.content = (TextViewVertical) convertView.findViewById(R.id.tv_content);
-				convertView.setTag(viewholder);
-			}else{
-				viewholder = (ViewHolder) convertView.getTag();
-			}
+			viewholder.content = (TextViewVertical) convertView.findViewById(R.id.tv_content);
+			convertView.setTag(viewholder);
 
 			viewholder.content.setText(messageList.get(position).content);
 

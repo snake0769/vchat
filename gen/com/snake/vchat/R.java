@@ -36,7 +36,7 @@ public final class R {
         public static final int et_nickname=0x7f08000c;
         public static final int et_password=0x7f08000a;
         public static final int et_username=0x7f080009;
-        public static final int iv_avatar=0x7f080013;
+        public static final int iv_avatar=0x7f080012;
         public static final int iv_back=0x7f080016;
         public static final int layout_input=0x7f080000;
         public static final int layout_root=0x7f080008;
@@ -46,7 +46,7 @@ public final class R {
         public static final int rb_contacts=0x7f080006;
         public static final int rb_conversation=0x7f080005;
         public static final int rg_function=0x7f080004;
-        public static final int tv_content=0x7f080012;
+        public static final int tv_content=0x7f080013;
         public static final int tv_lastRecord=0x7f080015;
         public static final int tv_name=0x7f080014;
         public static final int tv_operation=0x7f080002;

@@ -1,30 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/msgPadding" 
-    android:gravity="bottom">
+    android:gravity="bottom"
+    android:padding="@dimen/msgPadding" >
+
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="@dimen/msgAvatarSize"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_launcher" />
 
     <com.snake.vchat.component.TextViewVertical
         android:id="@+id/tv_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/msgAvatarSize"
-        android:background="@drawable/bg_msgbox" />
-        <!-- <TextView
-        android:id="@+id/tv_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/msgAvatarSize"
-        android:background="@android:color/white" /> -->
+        android:layout_above="@id/iv_avatar"
+        android:layout_alignLeft="@id/iv_avatar"
+        android:layout_alignRight="@id/iv_avatar" />
 
-    <ImageView
-        android:id="@+id/iv_avatar"
-        android:layout_width="@dimen/msgAvatarSize"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_launcher" />
 
-</LinearLayout>
+</RelativeLayout>

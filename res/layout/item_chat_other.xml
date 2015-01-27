@@ -17,6 +17,7 @@
     <com.snake.vchat.component.TextViewVertical 
         android:id="@+id/tv_content"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_msgbox" />
 
 </LinearLayout>
